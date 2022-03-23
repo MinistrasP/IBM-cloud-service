@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "memory.h": "c",
+        "stdlib.h": "c",
+        "argp.h": "c"
+    }
+}
