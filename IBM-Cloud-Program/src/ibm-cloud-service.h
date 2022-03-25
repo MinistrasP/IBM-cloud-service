@@ -1,6 +1,10 @@
 struct arguments
 {
   char *args[4];
+  char *orgid;
+  char *typeid;
+  char *deviceid;
+  char *token;
 };
 
 int config_watson(IoTPConfig **config, struct arguments *arg);

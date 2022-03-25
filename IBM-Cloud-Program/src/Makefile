@@ -1,11 +1,11 @@
-BIN = IBM-Cloud-Program
+BIN = ibmCloud_Program
 
 .PHONY: all clean
 
-all: IBM-Cloud-Program
+all: ibmCloud_Program
 
-IBM-Cloud-Program: ubus_mem.c ibm-cloud-service.c main.c
+ibmCloud_Program: ubus_mem.c ibm-cloud-service.c main.c
 	$(CC) -o $@ $^ -lblobmsg_json -lubox -lubus -libm-iot -largp
 
 clean:
-	rm -rf IBM-Cloud-Program
+	rm -rf ibmCloud_Program

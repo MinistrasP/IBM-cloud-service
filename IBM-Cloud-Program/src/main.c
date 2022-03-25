@@ -14,37 +14,46 @@ const char *argp_program_version = "argp-ex2 1.0";
 const char *argp_program_bug_address = "<kasparas.elzbutas@teltonika.lt>";
 static char doc[] = "IBM-Cloud-Program usage:\n"
                      "Takes 4 arguments: \n"
-                     "orgId - organization ID\n"
-                     "typeId - device type ID\n"
-                     "deviceId - device ID\n"
-                     "token - secure token from IBM cloud\n";
+                     "-o <orgId> - organization ID\n"
+                     "-t <typeId> - device type ID\n"
+                     "-d <deviceId> - device ID\n"
+                     "-k <token> - secure token from IBM cloud\n";
 
-static char args_doc[] = "ARG1(orgId), ARG2(typeId), ARG3(deviceId), ARG4(token)";
+static char args_doc[] = "-o (OrgId), -t (TypeId), -d (DeviceId), -k (Token)";
 
-static error_t
-parse_opt (int key, char *arg, struct argp_state *state)
+static struct argp_option options[] = {
+  {"orgId",    'o',"OrgId", 0,     "Organization ID" },
+  {"typeId",   't',"TypeId", 0,    "Device type ID" },
+  {"deviceId", 'd',"DeviceId", 0,  "Device ID"},
+  {"token",    'k',"Token", 0,     "Authentication token" },
+  { 0 }
+};
+
+static error_t parse_opt (int key, char *arg, struct argp_state *state)
 {
-  struct arguments *arguments = state->input;
-  switch (key)
-    {
-    case ARGP_KEY_ARG:
-      if (state->arg_num >= 4)
-        argp_usage (state);
-      arguments->args[state->arg_num] = arg;
-      break;
-
-    case ARGP_KEY_END:
-      if (state->arg_num < 4)
-        argp_usage (state);
-      break;
-
-    default:
-      return ARGP_ERR_UNKNOWN;
+    struct arguments *arguments = state->input;
+    int *arg_count = state->input;
+    switch (key){
+        case 'o':
+          arguments->orgid = arg;
+        break;
+        case 't':
+          arguments->typeid = arg;
+        break; 
+        case 'd':
+          arguments->deviceid = arg;
+        break; 
+        case 'k':
+          arguments->token = arg;
+        break;
+        case ARGP_KEY_ARG:
+          argp_usage (state);
+        break;
     }
-  return 0;
-}
+ return 0;
+}  
 
-static struct argp argp = { NULL, parse_opt, args_doc, doc };
+static struct argp argp = { options, parse_opt, args_doc, doc };
 
 static void sigHandler(int sig) 
 {
@@ -57,35 +66,39 @@ int main (int argc, char **argv)
 {
     IoTPConfig *config = NULL;
     IoTPDevice *device = NULL;
-    struct arguments arguments;
+    struct arguments args = {0};
     int rc = 0;
     int clean = 0;
 
     openlog("syslog_log", LOG_PID, LOG_USER);
-    argp_parse (&argp, argc, argv, 0, 0, &arguments);
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
     syslog(LOG_INFO, "IBM Cloud service: Started");
-
-    rc = config_watson(&config, &arguments);
+    argp_parse (&argp, argc, argv, ARGP_NO_ARGS, 0, &args);
+    
+    if(args.orgid == NULL || args.typeid == NULL ||
+     args.deviceid == NULL || args.token == NULL){
+       syslog(LOG_ERR, "IBM Cloud service: Some fields are empty");
+       goto cleanup;
+    }
+    rc = config_watson(&config, &args);
     if(rc != 0){
         clean = 0;
         goto cleanup;
     }
     rc = init_watson(&config, &device);
     if(rc != 0){
-        clean = 1;
+        cleanup_watson(&config, &device, 1);
         goto cleanup;
     }
     rc = sendData_watson(&device);
     if(rc != 0){
         syslog(LOG_INFO, "IBM Cloud service: Finished sending data");
-        clean = 2;
+        cleanup_watson(&config, &device, 2);
         goto cleanup;
     }
 
     cleanup:
-        cleanup_watson(&config, &device, clean);
         closelog();
         return 1;
 }

@@ -18,7 +18,7 @@ define Package/IBM-Cloud-Program/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_DIR) $(1)/etc/init.d
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/IBM-Cloud-Program $(1)/usr/bin/IBM-Cloud-Program
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/ibmCloud_Program $(1)/usr/bin/ibmCloud_Program
 	$(INSTALL_BIN) ./files/ibmCloudProg.init $(1)/etc/init.d/ibmCloudProg
 	$(INSTALL_CONF) ./files/ibmCloudProg.config $(1)/etc/config/ibmCloudProg
 endef
