@@ -2,7 +2,7 @@
 #include <syslog.h>
 #include <iotp_device.h>
 #include "ubus_mem.h"
-#include "ibm-cloud-service.h"
+#include "ibm_cloud_service.h"
 
 extern volatile int interrupt;
 

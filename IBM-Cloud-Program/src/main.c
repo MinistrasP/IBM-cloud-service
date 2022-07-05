@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <argp.h>
 #include "ubus_mem.h"
-#include "ibm-cloud-service.h"
+#include "ibm_cloud_service.h"
 
 volatile int interrupt = 0;
 
